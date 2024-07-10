@@ -4,15 +4,6 @@ const downloadHeaders = (filename: string, contentLength: number) => ({
     "content-length": contentLength.toString(10),
 });
 
-const isValidUrl = (url: string): boolean => {
-    try {
-        new URL(url);
-        return true;
-    } catch (_e) {
-        return false;
-    }
-};
-
 const MAX_HOSTNAME_LENGTH = 20;
 const MAX_PATHNAME_LENGTH = 30;
 
@@ -30,4 +21,38 @@ const generateFilename = (url: string, jsonFormat = false) => {
     return `${cleanedHost}_${cleanedPathname}.${jsonFormat ? "json" : "md"}`;
 };
 
-export { downloadHeaders, generateFilename, isValidUrl };
+const fetchHtmlText = async (url: string): Promise<string> => {
+    try {
+        const validUrl = new URL(url);
+        const response = await fetch(validUrl);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const contentType = response.headers.get("Content-Type");
+        if (!contentType || !contentType.includes("text/html")) {
+            throw new Error("Invalid content type! Must be text/html");
+        }
+
+        const blob = await response.blob();
+        const MAX_SIZE = 3 * 1024 * 1024; // 30 MB limit
+        if (blob.size > MAX_SIZE) {
+            throw new Error(`Page too large. Maximum size is ${MAX_SIZE} MB.`);
+        }
+
+        return blob.text();
+    } catch (error) {
+        console.error("Error fetching HTML text:", error);
+        throw error;
+    }
+};
+
+const addCorsHeaders = (headers: Headers, domain = "*"): Headers => {
+    headers.set("Access-Control-Allow-Origin", domain);
+    headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    headers.set("Access-Control-Allow-Headers", "Content-Type");
+    return headers;
+};
+
+export { addCorsHeaders, downloadHeaders, fetchHtmlText, generateFilename };

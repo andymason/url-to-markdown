@@ -1,47 +1,64 @@
 import { indexHtml } from "./src/index-template.ts";
 import { transformHtmlToMarkdown } from "./src/html-to-markdown.ts";
-import { downloadHeaders, generateFilename, isValidUrl } from "./src/utils.ts";
+import {
+    addCorsHeaders,
+    downloadHeaders,
+    fetchHtmlText,
+    generateFilename,
+} from "./src/utils.ts";
 
 Deno.serve(async (request: Request) => {
     switch (request.method) {
         case "GET":
             return new Response(indexHtml, {
-                headers: { "content-type": "text/html" },
+                headers: addCorsHeaders(
+                    new Headers({ "content-type": "text/html" }),
+                ),
             });
 
         case "POST": {
-            const formData = await request.formData();
-            const download = !!formData.get("download");
-            const jsonFormat = !!formData.get("json");
+            try {
+                const formData = await request.formData();
+                const download = !!formData.get("download");
+                const jsonFormat = !!formData.get("json");
+                const url = formData.get("url") as string;
 
-            const url = formData.get("url") as string;
-            if (!isValidUrl(url)) {
-                return new Response("Invalid URL provided", {
-                    status: 400,
+                const urlTextContent = await fetchHtmlText(url);
+                const markdownData = await transformHtmlToMarkdown(
+                    urlTextContent,
+                    jsonFormat,
+                    url,
+                );
+
+                const fileName = generateFilename(url, jsonFormat);
+
+                return new Response(markdownData, {
+                    headers: addCorsHeaders(
+                        new Headers({
+                            "content-type": jsonFormat
+                                ? "application/json"
+                                : "text/plain; charset=utf-8",
+                            ...(download
+                                ? downloadHeaders(fileName, markdownData.length)
+                                : {}),
+                        }),
+                    ),
                 });
+            } catch (error) {
+                console.error("Error processing request:", error);
+                return new Response(
+                    `Error processing request: ${error.message}`,
+                    {
+                        status: 500,
+                    },
+                );
             }
-
-            const urlResponse = await fetch(url);
-            const urlTextContent = await urlResponse.text();
-            const markdownData = await transformHtmlToMarkdown(
-                urlTextContent,
-                jsonFormat,
-                url,
-            );
-
-            const fileName = generateFilename(url, jsonFormat);
-
-            return new Response(markdownData, {
-                headers: {
-                    "content-type": jsonFormat
-                        ? "application/json"
-                        : "text/plain; charset=utf-8",
-                    ...(download
-                        ? downloadHeaders(fileName, markdownData.length)
-                        : {}),
-                },
-            });
         }
+
+        case "OPTIONS":
+            return new Response(null, {
+                headers: addCorsHeaders(new Headers()),
+            });
 
         default:
             return new Response("Invalid HTTP method", {

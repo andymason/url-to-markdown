@@ -22,6 +22,7 @@ const indexHtml = `
                 --background-colour: #161616;
                 --text-colour: #ececec;
                 --tint-colour: #1e1e1e;
+                --invalid-colour: #e1e1e1;
             }
         }
 
@@ -30,6 +31,7 @@ const indexHtml = `
                 --background-colour: #fefefe;
                 --text-colour: #121212;
                 --tint-colour: #f8f8f8;
+                --invalid-colour: #e1e1e1;
             }
         }
 
@@ -65,11 +67,17 @@ const indexHtml = `
                 flex-wrap: wrap;
             }
 
-            input[type="text"] {
+            input[type="url"] {
+                border: 1px solid var(--text-colour);
+                border-radius: 0.2rem;
                 flex: 1;
                 font-size: 1.1rem;
                 min-width: 6rem;
-                padding: 0.2rem 0.5rem;
+                padding: 0.3rem 0.5rem;
+
+                &:not(:placeholder-shown):invalid {
+                    background: var(--invalid-colour);
+                }
             }
 
             #options {
@@ -94,7 +102,15 @@ const indexHtml = `
         <main>
             <form action="" method="post">
                 <p id="url-input">
-                    <input title="URL of the webpage you want to convert" placeholder="https://..." type="text" name="url" id="url" />
+                    <input
+                        title="URL of the webpage you want to convert"
+                        placeholder="https://..."
+                        type="url"
+                        name="url"
+                        id="url"
+                        pattern="http(s)?://.*"
+                        required
+                    />
                     <input type="submit" value="Convert" />
                 </p>
 

@@ -28,27 +28,32 @@ const transformHtmlToMarkdown = (
     jsonFormat = false,
     url = "",
 ): string => {
-    const document = new DOMParser().parseFromString(htmlText, "text/html");
-    const mainArticle = new Readability(document).parse();
+    try {
+        const document = new DOMParser().parseFromString(htmlText, "text/html");
+        const mainArticle = new Readability(document).parse();
 
-    if (!mainArticle) {
-        throw new Error("Could not parse HTML");
+        if (!mainArticle) {
+            throw new Error("Could not parse HTML");
+        }
+
+        const { content, title, siteName } = mainArticle;
+        const markdownContent = turndownService.turndown(content);
+
+        if (jsonFormat) {
+            return JSON.stringify({
+                url,
+                title,
+                siteName,
+                date: new Date().toISOString(),
+                content: `# ${title}\n\n${markdownContent}`,
+            } as JSONResponse);
+        }
+
+        return `# ${mainArticle.title}\n\n${markdownContent}`;
+    } catch (error) {
+        console.error("Error transforming HTML to Markdown:", error);
+        throw error;
     }
-
-    const { content, title, siteName } = mainArticle;
-    const markdownContent = turndownService.turndown(content);
-
-    if (jsonFormat) {
-        return JSON.stringify({
-            url,
-            title,
-            siteName,
-            date: new Date().toISOString(),
-            content: `# ${title}\n\n${markdownContent}`,
-        } as JSONResponse);
-    }
-
-    return `# ${mainArticle.title}\n\n${markdownContent}`;
 };
 
 export { transformHtmlToMarkdown };

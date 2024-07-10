@@ -22,9 +22,18 @@ const generateFilename = (url: string, jsonFormat = false) => {
 };
 
 const fetchHtmlText = async (url: string): Promise<string> => {
+    const MAX_SIZE = 3 * 1024 * 1024; // 30 MB limit
+
     try {
         const validUrl = new URL(url);
         const response = await fetch(validUrl);
+
+        const headResponse = await fetch(url, { method: "HEAD" });
+        const contentLength = headResponse.headers.get("content-length");
+
+        if (contentLength && parseInt(contentLength) > MAX_SIZE) {
+            throw new Error("Content too large");
+        }
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -35,8 +44,8 @@ const fetchHtmlText = async (url: string): Promise<string> => {
             throw new Error("Invalid content type! Must be text/html");
         }
 
+        // We've checked the content HEAD size but it could be lying
         const blob = await response.blob();
-        const MAX_SIZE = 3 * 1024 * 1024; // 30 MB limit
         if (blob.size > MAX_SIZE) {
             throw new Error(`Page too large. Maximum size is ${MAX_SIZE} MB.`);
         }

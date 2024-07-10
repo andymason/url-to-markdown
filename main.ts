@@ -1,6 +1,6 @@
-import { indexHtml } from "./index-template.ts";
-import { transformHtmlToMarkdown } from "./html-to-markdown.ts";
-import { downloadHeaders, generateFilename, isValidUrl } from "./utils.ts";
+import { indexHtml } from "./src/index-template.ts";
+import { transformHtmlToMarkdown } from "./src/html-to-markdown.ts";
+import { downloadHeaders, generateFilename, isValidUrl } from "./src/utils.ts";
 
 Deno.serve(async (request: Request) => {
     switch (request.method) {
@@ -15,7 +15,7 @@ Deno.serve(async (request: Request) => {
             const jsonFormat = !!formData.get("json");
 
             const url = formData.get("url") as string;
-            if (!url || !isValidUrl(url)) {
+            if (!isValidUrl(url)) {
                 return new Response("Invalid URL provided", {
                     status: 400,
                 });
@@ -26,7 +26,10 @@ Deno.serve(async (request: Request) => {
             const markdownData = await transformHtmlToMarkdown(
                 urlTextContent,
                 jsonFormat,
+                url,
             );
+
+            const fileName = generateFilename(url, jsonFormat);
 
             return new Response(markdownData, {
                 headers: {
@@ -34,10 +37,7 @@ Deno.serve(async (request: Request) => {
                         ? "application/json"
                         : "text/plain",
                     ...(download
-                        ? downloadHeaders(
-                            generateFilename(url, jsonFormat),
-                            markdownData.length,
-                        )
+                        ? downloadHeaders(fileName, markdownData.length)
                         : {}),
                 },
             });

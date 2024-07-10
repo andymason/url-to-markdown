@@ -1,11 +1,19 @@
 {
-	"tasks": {
-		"dev": "deno run --watch main.ts"
-	},
-	"compilerOptions": {
-		"types": ["npm:@types/dompurify"]
-	},
-	"fmt": {
-		"useTabs": false
-	}
+  "tasks": {
+    "dev": "deno run --watch main.ts"
+  },
+  "compilerOptions": {
+    "strict": true
+  },
+  "fmt": {
+    "useTabs": false
+  },
+  "deploy": {
+    "project": "f2727a42-74be-4ab5-b408-e2359cb6a6b6",
+    "exclude": [
+      "**/node_modules"
+    ],
+    "include": [],
+    "entrypoint": "main.ts"
+  }
 }

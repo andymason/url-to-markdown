@@ -15,9 +15,18 @@ const turndownService = new TurndownService(turndownOptions);
 turndownService.use(turndownPluginGfm.gfm);
 turndownService.remove(["figure", "img", "iframe"]);
 
+interface JSONResponse {
+    url: string;
+    title: string;
+    siteName: string;
+    date: string;
+    content: string;
+}
+
 const transformHtmlToMarkdown = (
     htmlText: string,
     jsonFormat = false,
+    url = "",
 ): string => {
     const document = new DOMParser().parseFromString(htmlText, "text/html");
     const mainArticle = new Readability(document).parse();
@@ -26,16 +35,17 @@ const transformHtmlToMarkdown = (
         throw new Error("Could not parse HTML");
     }
 
-    const { content, title, siteName, publishedTime } = mainArticle;
+    const { content, title, siteName } = mainArticle;
     const markdownContent = turndownService.turndown(content);
 
     if (jsonFormat) {
         return JSON.stringify({
+            url,
             title,
             siteName,
-            publishedTime,
+            date: new Date().toISOString(),
             content: `# ${title}\n\n${markdownContent}`,
-        });
+        } as JSONResponse);
     }
 
     return `# ${mainArticle.title}\n\n${markdownContent}`;

@@ -1,0 +1,11 @@
+{
+	"tasks": {
+		"dev": "deno run --watch main.ts"
+	},
+	"compilerOptions": {
+		"types": ["npm:@types/dompurify"]
+	},
+	"fmt": {
+		"useTabs": false
+	}
+}

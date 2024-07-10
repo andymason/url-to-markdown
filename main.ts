@@ -35,7 +35,7 @@ Deno.serve(async (request: Request) => {
                 headers: {
                     "content-type": jsonFormat
                         ? "application/json"
-                        : "text/plain",
+                        : "text/plain; charset=utf-8",
                     ...(download
                         ? downloadHeaders(fileName, markdownData.length)
                         : {}),

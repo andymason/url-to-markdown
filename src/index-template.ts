@@ -153,7 +153,6 @@ const indexHtml = `
 interface JSONResponse {
     url: string;
     title: string;
-    siteName: string;
     date: string;
     content: string;
 }</code></pre>

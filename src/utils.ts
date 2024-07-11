@@ -1,9 +1,3 @@
-const downloadHeaders = (filename: string, contentLength: number) => ({
-    "content-type": "text/html; charset=utf-8",
-    "content-Disposition": `attachment; filename=${filename}`,
-    "content-length": contentLength.toString(10),
-});
-
 const MAX_HOSTNAME_LENGTH = 20;
 const MAX_PATHNAME_LENGTH = 30;
 
@@ -62,6 +56,16 @@ const addCorsHeaders = (headers: Headers, domain = "*"): Headers => {
     headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     headers.set("Access-Control-Allow-Headers", "Content-Type");
     return headers;
+};
+
+const downloadHeaders = (
+    headers: Headers,
+    filename: string,
+    contentLength: number,
+) => {
+    headers.set("content-type", "text/plain; charset=utf-8");
+    headers.set("content-Disposition", `attachment; filename=${filename}`);
+    headers.set("content-length", contentLength.toString(10));
 };
 
 export { addCorsHeaders, downloadHeaders, fetchHtmlText, generateFilename };

@@ -1,5 +1,8 @@
 import { indexHtml } from "./src/index-template.ts";
-import { transformHtmlToMarkdown } from "./src/html-to-markdown.ts";
+import {
+    generateJsonData,
+    generateMarkdownText,
+} from "./src/html-to-markdown.ts";
 import {
     addCorsHeaders,
     downloadHeaders,
@@ -24,26 +27,26 @@ Deno.serve(async (request: Request) => {
                 const url = formData.get("url") as string;
 
                 const urlTextContent = await fetchHtmlText(url);
-                const markdownData = await transformHtmlToMarkdown(
-                    urlTextContent,
-                    jsonFormat,
-                    url,
-                );
 
-                const fileName = generateFilename(url, jsonFormat);
+                const headers = new Headers();
+                addCorsHeaders(headers);
 
-                return new Response(markdownData, {
-                    headers: addCorsHeaders(
-                        new Headers({
-                            "content-type": jsonFormat
-                                ? "application/json"
-                                : "text/plain; charset=utf-8",
-                            ...(download
-                                ? downloadHeaders(fileName, markdownData.length)
-                                : {}),
-                        }),
-                    ),
-                });
+                let responseText = "";
+
+                if (jsonFormat) {
+                    headers.set("content-type", "application/json");
+                    responseText = generateJsonData(urlTextContent, url);
+                } else {
+                    headers.set("content-type", "text/plain; charset=utf-8");
+                    responseText = generateMarkdownText(urlTextContent);
+                }
+
+                if (download) {
+                    const fileName = generateFilename(url, jsonFormat);
+                    downloadHeaders(headers, fileName, responseText.length);
+                }
+
+                return new Response(responseText, { headers });
             } catch (error) {
                 console.error("Error processing request:", error);
                 return new Response(

@@ -1,12 +1,40 @@
 {
   "tasks": {
-    "dev": "deno run --watch main.ts"
+    "dev": "deno run --allow-net --watch main.ts"
   },
   "compilerOptions": {
     "strict": true
   },
   "fmt": {
     "useTabs": false
+  },
+  "imports": {
+    "deno-dom": "https://deno.land/x/deno_dom@v0.1.46/deno-dom-wasm.ts",
+    "readability": "npm:@mozilla/readability@0.5.0",
+    "turndown": "npm:turndown@7.2.0",
+    "turndownPluginGfm": "npm:@joplin/turndown-plugin-gfm@1.0.56"
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"],
+      "include": [
+        "no-external-import",
+        "camelcase",
+        "no-boolean-literal-for-arguments",
+        "default-param-last",
+        "no-const-assign",
+        "eqeqeq",
+        "no-self-compare",
+        "explicit-function-return-type",
+        "guard-for-in",
+        "no-inferrable-types",
+        "no-sync-fn-in-async-fn",
+        "no-sparse-arrays",
+        "no-throw-literal",
+        "single-var-declarator",
+        "verbatim-module-syntax"
+      ]
+    }
   },
   "deploy": {
     "project": "f2727a42-74be-4ab5-b408-e2359cb6a6b6",

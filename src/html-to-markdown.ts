@@ -1,10 +1,7 @@
-import {
-    DOMParser,
-    HTMLDocument,
-} from "https://deno.land/x/deno_dom/deno-dom-wasm.ts";
-import { Readability } from "npm:@mozilla/readability";
-import TurndownService from "npm:turndown";
-import turndownPluginGfm from "npm:joplin-turndown-plugin-gfm";
+import { DOMParser, type HTMLDocument } from "deno-dom";
+import { Readability } from "readability";
+import TurndownService from "turndown";
+import turndownPluginGfm from "turndownPluginGfm";
 
 interface JSONResponse {
     url: string;
